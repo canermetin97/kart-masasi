@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Kart Masası — Texas Hold'em & Blackjack</title>
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#8c1526">
+<meta name="description" content="Texas Hold'em ve Blackjack — tek cihazda, botlara karşı.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kart Masası">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+
+<link rel="stylesheet" href="css/style.css?v=6">
+</head>
+<body>
+
+<!-- ==================== MENÜ ==================== -->
+<section id="screen-menu" class="screen active">
+  <div class="menu-wrap">
+    <h1 class="logo">KART <span>MASASI</span></h1>
+    <p class="tagline">Bir oyun seç, masaya otur.</p>
+    <div class="menu-tools">
+      <button class="btn ghost small sfx-btn" data-sfx-btn>🔊 Ses</button>
+      <button class="btn ghost small sfx-btn" data-speed-btn>⏱ Normal</button>
+    </div>
+
+    <div class="game-cards">
+      <button class="game-card" data-game="poker">
+        <div class="gc-icon"><span class="s-red">♥</span><span>♠</span></div>
+        <h2>Texas Hold'em</h2>
+        <p>3–6 kişilik masa · Blind'lar<br>Flop · Turn · River</p>
+        <span class="gc-go">Oyna</span>
+      </button>
+      <button class="game-card" data-game="blackjack">
+        <div class="gc-icon"><span class="s-red">♦</span><span>♣</span></div>
+        <h2>Blackjack</h2>
+        <p>3–6 kişilik masa · 6 deste<br>Double · Split · Sigorta yok</p>
+        <span class="gc-go">Oyna</span>
+      </button>
+    </div>
+    <p class="footnote">Gerçek para yok — sadece jeton. Tüm oyuncular tek cihazda; diğer koltuklarda bot oyuncular oturur.</p>
+  </div>
+</section>
+
+<!-- ==================== KURULUM ==================== -->
+<section id="screen-setup" class="screen">
+  <div class="menu-wrap">
+    <button class="btn ghost back-btn" data-goto="menu">‹ Geri</button>
+    <h2 class="setup-title" id="setup-title">Masayı Kur</h2>
+
+    <div class="field">
+      <label>Adın</label>
+      <input id="setup-name" type="text" maxlength="12" value="Sen" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label>Masadaki oyuncu sayısı <span class="hint">(sen dahil)</span></label>
+      <div class="chip-row" id="setup-count">
+        <button class="chip-btn" data-v="3">3</button>
+        <button class="chip-btn selected" data-v="4">4</button>
+        <button class="chip-btn" data-v="5">5</button>
+        <button class="chip-btn" data-v="6">6</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Başlangıç jetonu</label>
+      <div class="chip-row" id="setup-stack">
+        <button class="chip-btn" data-v="500">500</button>
+        <button class="chip-btn selected" data-v="1000">1.000</button>
+        <button class="chip-btn" data-v="2500">2.500</button>
+        <button class="chip-btn" data-v="5000">5.000</button>
+      </div>
+    </div>
+
+    <div class="field" id="setup-blind-field">
+      <label>Başlangıç blind'ları</label>
+      <div class="chip-row" id="setup-blinds">
+        <button class="chip-btn selected" data-v="10">5 / 10</button>
+        <button class="chip-btn" data-v="20">10 / 20</button>
+        <button class="chip-btn" data-v="50">25 / 50</button>
+      </div>
+    </div>
+
+    <div class="field" id="setup-blindup-field">
+      <label>Blind artışı <span class="hint">(turnuva temposu)</span></label>
+      <div class="chip-row" id="setup-blindup">
+        <button class="chip-btn selected" data-v="0">Kapalı</button>
+        <button class="chip-btn" data-v="5">5 elde bir</button>
+        <button class="chip-btn" data-v="10">10 elde bir</button>
+        <button class="chip-btn" data-v="20">20 elde bir</button>
+      </div>
+    </div>
+
+    <button class="btn primary big" id="setup-start">Masaya Otur</button>
+  </div>
+</section>
+
+<!-- ==================== POKER ==================== -->
+<section id="screen-poker" class="screen">
+  <header class="topbar">
+    <button class="btn ghost small" data-goto="menu">‹ Menü</button>
+    <div class="topbar-info">
+      <span>El <b id="pk-hand">1</b></span>
+      <span>Blind <b id="pk-blinds">5/10</b><i id="pk-level"></i></span>
+      <span class="stage-badge" id="pk-stage">Preflop</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn ghost small sfx-btn" id="pk-eye">👁 Açık</button>
+      <button class="btn ghost small sfx-btn" data-speed-btn>⏱ Normal</button>
+      <button class="btn ghost small sfx-btn" data-sfx-btn>🔊 Ses</button>
+      <button class="btn ghost small" id="pk-log-toggle">Kayıt</button>
+    </div>
+  </header>
+
+  <div class="table-area">
+    <div class="felt" id="pk-felt">
+      <div class="felt-inner"></div>
+      <div class="board-zone">
+        <div class="pot-display">POT <b id="pk-pot">0</b></div>
+        <div class="community" id="pk-community"></div>
+        <div class="board-msg" id="pk-msg"></div>
+      </div>
+      <div class="seats" id="pk-seats"></div>
+    </div>
+  </div>
+
+  <footer class="actionbar" id="pk-actions">
+    <div class="my-hand">
+      <div class="hand-cards" id="pk-my-cards"></div>
+      <div class="my-hand-name" id="pk-my-name"></div>
+    </div>
+    <div class="act-info">
+      <span id="pk-you-chips">Jeton: 1000</span>
+      <span id="pk-tocall"></span>
+    </div>
+    <div class="act-buttons">
+      <button class="btn danger" id="pk-fold">Fold</button>
+      <button class="btn" id="pk-check">Check</button>
+      <button class="btn primary" id="pk-raise">Raise</button>
+    </div>
+    <div class="raise-row" id="pk-raise-row">
+      <input type="range" id="pk-raise-slider" min="0" max="100" value="0">
+      <div class="raise-meta">
+        <b id="pk-raise-amount">0</b>
+        <div class="quick">
+          <button data-q="0.5">½ Pot</button>
+          <button data-q="0.75">¾ Pot</button>
+          <button data-q="1">Pot</button>
+          <button data-q="all">All-in</button>
+        </div>
+        <button class="btn primary small" id="pk-raise-confirm">Onayla</button>
+        <button class="btn ghost small" id="pk-raise-cancel">Vazgeç</button>
+      </div>
+    </div>
+    <button class="btn primary big hidden" id="pk-next">Sonraki El</button>
+  </footer>
+
+  <aside class="logpanel" id="pk-logpanel"><div class="log-head">Oyun Kaydı</div><ul id="pk-log"></ul></aside>
+</section>
+
+<!-- ==================== BLACKJACK ==================== -->
+<section id="screen-blackjack" class="screen">
+  <header class="topbar">
+    <button class="btn ghost small" data-goto="menu">‹ Menü</button>
+    <div class="topbar-info">
+      <span>El <b id="bj-hand">1</b></span>
+      <span>Deste <b id="bj-shoe">6</b></span>
+      <span class="stage-badge" id="bj-stage">Bahis</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn ghost small sfx-btn" data-speed-btn>⏱ Normal</button>
+      <button class="btn ghost small sfx-btn" data-sfx-btn>🔊 Ses</button>
+      <button class="btn ghost small" id="bj-log-toggle">Kayıt</button>
+    </div>
+  </header>
+
+  <div class="table-area">
+    <div class="felt bj" id="bj-felt">
+      <div class="felt-inner"></div>
+      <div class="dealer-zone">
+        <div class="seat-name dealer-name">KRUPİYE <span id="bj-dealer-total"></span></div>
+        <div class="hand-cards" id="bj-dealer-cards"></div>
+      </div>
+      <div class="board-msg" id="bj-msg">Bahsini koy</div>
+      <div class="bj-shoe" id="bj-shoe-visual" aria-hidden="true">
+        <div class="card back"></div>
+        <div class="card back"></div>
+        <div class="card back"></div>
+        <span class="shoe-label">DESTE</span>
+      </div>
+      <div class="bj-seats" id="bj-seats"></div>
+    </div>
+  </div>
+
+  <footer class="actionbar">
+    <div class="my-hand">
+      <div class="hand-cards" id="bj-my-cards"></div>
+      <div class="my-hand-name" id="bj-my-name"></div>
+    </div>
+    <div class="act-info">
+      <span id="bj-you-chips">Jeton: 1000</span>
+      <span id="bj-you-bet"></span>
+    </div>
+    <div class="act-buttons" id="bj-bet-buttons">
+      <button class="btn" data-bet="10">+10</button>
+      <button class="btn" data-bet="25">+25</button>
+      <button class="btn" data-bet="100">+100</button>
+      <button class="btn ghost" id="bj-bet-clear">Sıfırla</button>
+      <button class="btn primary" id="bj-deal">Dağıt</button>
+    </div>
+    <div class="act-buttons hidden" id="bj-play-buttons">
+      <button class="btn primary" id="bj-hit">Kart Çek</button>
+      <button class="btn" id="bj-stand">Dur</button>
+      <button class="btn" id="bj-double">Double</button>
+      <button class="btn" id="bj-split">Split</button>
+    </div>
+    <button class="btn primary big hidden" id="bj-next">Sonraki El</button>
+  </footer>
+
+  <aside class="logpanel" id="bj-logpanel"><div class="log-head">Oyun Kaydı</div><ul id="bj-log"></ul></aside>
+</section>
+
+<script src="js/sfx.js?v=6"></script>
+<script src="js/speed.js?v=6"></script>
+<script src="js/cards.js?v=6"></script>
+<script src="js/poker.js?v=6"></script>
+<script src="js/blackjack.js?v=6"></script>
+<script src="js/app.js?v=6"></script>
+</body>
+</html>
