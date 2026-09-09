@@ -1,0 +1,11 @@
+name = "kart-masasi"
+main = "src/index.js"
+compatibility_date = "2025-08-01"
+
+[[durable_objects.bindings]]
+name = "TABLE"
+class_name = "Table"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Table"]
