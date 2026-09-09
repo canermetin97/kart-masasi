@@ -25,10 +25,15 @@
     <use href="#spade" fill="#1b1216" transform="translate(0 4) scale(.74)"/>
   </g>
 
-  <!-- öndeki kart -->
+  <!-- öndeki kart: köşelerde G ve C -->
   <g transform="translate(330 250) rotate(13)" filter="url(#sh)">
     <rect x="-82" y="-114" width="164" height="228" rx="24" fill="url(#face)"/>
-    <use href="#heart" fill="#c8172c" transform="translate(0 6) scale(.74)"/>
+    <use href="#heart" fill="#c8172c" transform="translate(0 4) scale(.56)"/>
+    <g fill="#c8172c" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+       font-size="50" font-weight="bold" text-anchor="middle">
+      <text x="-52" y="-58">G</text>
+      <text x="52" y="94">C</text>
+    </g>
   </g>
   </g>
 </svg>
