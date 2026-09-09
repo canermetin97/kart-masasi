@@ -289,9 +289,8 @@ function humanTurn(h) {
   $('bj-double').disabled = !canDouble(S.me, h);
   $('bj-split').disabled = !canSplit(S.me, h);
   const v = handValue(h.cards);
-  $('bj-msg').innerHTML =
-    `<b>SIRA SENDE</b> — elin ${v.total}${v.soft ? ' (soft)' : ''}. ` +
-    `Acele yok, karar verene kadar masa bekler.`;
+  // tek satırda kalmalı: uzun mesaj dar ekranda oyuncuların kartlarını örtüyor
+  $('bj-msg').innerHTML = `<b>SIRA SENDE</b> — elin ${v.total}${v.soft ? ' (soft)' : ''}`;
   $('bj-stage').textContent = 'Sıra sende';
 }
 
