@@ -1,22 +1,22 @@
 /* Kart Masası — çevrimdışı çalışma için servis çalışanı.
    ASSETS listesindeki ?v= sürümleri index.html ile birebir aynı olmalı;
    sürüm artınca yeni önbellek oluşur ve eskisi silinir. */
-const VERSION = 'v13';
+const VERSION = 'v14';
 const CACHE = 'kartmasasi-' + VERSION;
 
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './css/style.css?v=13',
-  './js/rules.js?v=13',
-  './js/sfx.js?v=13',
-  './js/speed.js?v=13',
-  './js/cards.js?v=13',
-  './js/poker.js?v=13',
-  './js/blackjack.js?v=13',
-  './js/online.js?v=13',
-  './js/app.js?v=13',
+  './css/style.css?v=14',
+  './js/rules.js?v=14',
+  './js/sfx.js?v=14',
+  './js/speed.js?v=14',
+  './js/cards.js?v=14',
+  './js/poker.js?v=14',
+  './js/blackjack.js?v=14',
+  './js/online.js?v=14',
+  './js/app.js?v=14',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',

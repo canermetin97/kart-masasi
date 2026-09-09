@@ -9,7 +9,7 @@ const Online = (() => {
    Cloudflare Worker'a bağlanır. */
 const SERVER = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
   ? 'ws://localhost:8787'
-  : 'wss://kart-masasi.canermetin97.workers.dev';
+  : 'wss://kart-masasi.scanerm97.workers.dev';
 
 const $ = id => document.getElementById(id);
 const KEY_ID = 'kartmasasi.playerId';

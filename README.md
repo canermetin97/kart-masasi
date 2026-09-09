@@ -49,6 +49,20 @@ Derlemenin durumunu görmek için: `gh api /repos/canermetin97/kart-masasi/pages
 Kodda bir şey değiştirdiğinde ikisini birlikte artır — yoksa tarayıcı ve servis çalışanı
 eski dosyaları servis etmeye devam eder.
 
+## Çevrimiçi blackjack
+
+İki (en fazla dört) kişi ayrı cihazlardan aynı masaya oturabilir.
+
+Menüden **Çevrimiçi Blackjack** → **Yeni Oda Kur** de, çıkan 5 haneli kodu paylaş.
+Karşı taraf aynı menüden kodu girip katılır. Masayı kuran kişi koltuk sayısını ve
+başlangıç jetonunu belirler, boş koltuklarda bot oynar. Jetonlar oda boşalınca sıfırlanır.
+
+Sunucu: `https://kart-masasi.scanerm97.workers.dev` (Cloudflare Worker + Durable Object).
+Kaynak `server/` klasöründe; deploy için `cd server && npx wrangler deploy`.
+
+Kartları sunucu dağıtır ve her oyuncuya yalnızca görmeye hakkı olduğu bilgi gönderilir —
+krupiyenin kapalı kartı istemciye hiç gitmez.
+
 ## Ayarlar
 
 Üst barda (ve menüde) iki buton var, tercihin tarayıcıda saklanır:
