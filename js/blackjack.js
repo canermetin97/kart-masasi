@@ -6,6 +6,8 @@
 const Blackjack = (() => {
 
 const BOT_NAMES = ['Cem', 'Zeynep', 'Murat', 'Elif', 'Kaan', 'Deniz', 'Selin', 'Emre', 'Burak'];
+/* Kurallar js/rules.js'ten gelir — çevrimiçi masayı çalıştıran sunucu da
+   aynı dosyayı kullanır, böylece iki mod birebir aynı oynar. */
 const DECKS = 6, MIN_BET = 10;
 
 let S = null, token = 0;
@@ -13,17 +15,11 @@ const $ = id => document.getElementById(id);
 const later = (fn, ms) => { const t = token; setTimeout(() => { if (t === token && S) fn(); }, Speed.ms(ms)); };
 
 /* ---------------- yardımcılar ---------------- */
-function handValue(cards) {
-  let t = 0, aces = 0;
-  for (const c of cards) {
-    if (c.v === 14) { t += 11; aces++; }
-    else t += Math.min(c.v, 10);
-  }
-  while (t > 21 && aces > 0) { t -= 10; aces--; }
-  return { total: t, soft: aces > 0 };
-}
-const bjValue = c => (c.v === 14 ? 11 : Math.min(c.v, 10));
-const isBJ = h => h.cards.length === 2 && !h.fromSplit && handValue(h.cards).total === 21;
+const handValue   = cards => Rules.handValue(cards);
+const bjValue     = c => Rules.bjValue(c);
+const isBJ        = h => Rules.isBJ(h);
+const basicStrategy = (h, up, dbl, spl) => Rules.basicStrategy(h, up, dbl, spl);
+const settleHand  = (h, dealer) => Rules.settleHand(h, dealer);
 
 function log(text, hl) {
   const li = document.createElement('li');
@@ -209,11 +205,8 @@ function hit(p, h) {
   return false;
 }
 
-function canDouble(p, h) { return h.cards.length === 2 && !h.fromSplit2 && p.chips >= h.bet; }
-function canSplit(p, h) {
-  return h.cards.length === 2 && bjValue(h.cards[0]) === bjValue(h.cards[1])
-    && p.hands.length < 4 && p.chips >= h.bet;
-}
+const canDouble = (p, h) => Rules.canDouble(h, p.chips);
+const canSplit = (p, h) => Rules.canSplit(h, p.chips, p.hands.length);
 
 function doDouble(p, h) {
   p.chips -= h.bet; h.bet *= 2; h.doubled = true;
@@ -250,34 +243,6 @@ function botTurn(p, h) {
   if (mv === 'stand') { log(`${p.name} durdu (${handValue(h.cards).total})`); return finishHand(h); }
   const busted = hit(p, h);
   if (!busted) later(() => { if (S) botTurn(p, h); }, 750);
-}
-
-function basicStrategy(h, upCard, dbl, spl) {
-  const { total, soft } = handValue(h.cards);
-  const up = bjValue(upCard);
-  if (spl) {
-    const r = bjValue(h.cards[0]);
-    if (r === 11 || r === 8) return 'split';
-    if (r === 9 && up !== 7 && up <= 9) return 'split';
-    if ((r === 2 || r === 3 || r === 7) && up <= 7) return 'split';
-    if (r === 6 && up <= 6) return 'split';
-    if (r === 4 && (up === 5 || up === 6)) return 'split';
-  }
-  if (soft) {
-    if (total >= 19) return 'stand';
-    if (total === 18) { if (dbl && up >= 3 && up <= 6) return 'double'; return up >= 9 ? 'hit' : 'stand'; }
-    if (total === 17 && dbl && up >= 3 && up <= 6) return 'double';
-    if ((total === 15 || total === 16) && dbl && up >= 4 && up <= 6) return 'double';
-    if ((total === 13 || total === 14) && dbl && (up === 5 || up === 6)) return 'double';
-    return 'hit';
-  }
-  if (total >= 17) return 'stand';
-  if (total >= 13) return up >= 7 ? 'hit' : 'stand';
-  if (total === 12) return (up >= 4 && up <= 6) ? 'stand' : 'hit';
-  if (total === 11) return dbl ? 'double' : 'hit';
-  if (total === 10) return (dbl && up <= 9) ? 'double' : 'hit';
-  if (total === 9) return (dbl && up >= 3 && up <= 6) ? 'double' : 'hit';
-  return 'hit';
 }
 
 /* ---------------- insan kontrolleri ---------------- */
@@ -329,7 +294,7 @@ function dealerPlay() {
 
   const step = () => {
     const v = handValue(S.dealer.cards);
-    if (v.total < 17) {
+    if (Rules.dealerMustHit(S.dealer.cards)) {
       S.dealer.cards.push(draw());
       SFX.deal();
       render();
@@ -347,24 +312,12 @@ function settle() {
   S.phase = 'settle';
   S.dealer.hole = false;
   const dv = handValue(S.dealer.cards).total;
-  const dealerBJ = S.dealer.cards.length === 2 && dv === 21;
-  const dBust = dv > 21;
   let mine = 0;
 
   S.players.forEach(p => {
     if (p.out) return;
     p.hands.forEach(h => {
-      const v = handValue(h.cards).total;
-      const pBJ = isBJ(h);
-      let win = 0, res;
-      if (v > 21) { res = 'KAYIP'; win = 0; }
-      else if (pBJ && dealerBJ) { res = 'PUSH'; win = h.bet; }
-      else if (pBJ) { res = 'BLACKJACK'; win = h.bet + Math.round(h.bet * 1.5); }
-      else if (dealerBJ) { res = 'KAYIP'; win = 0; }
-      else if (dBust) { res = 'KAZANDI'; win = h.bet * 2; }
-      else if (v > dv) { res = 'KAZANDI'; win = h.bet * 2; }
-      else if (v === dv) { res = 'PUSH'; win = h.bet; }
-      else { res = 'KAYIP'; win = 0; }
+      const { result: res, payout: win } = settleHand(h, S.dealer.cards);
       h.result = res;
       if (res === 'KAZANDI' || res === 'BLACKJACK') p.winner = true;
       p.chips += win;

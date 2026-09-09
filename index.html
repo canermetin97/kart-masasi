@@ -15,7 +15,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 
-<link rel="stylesheet" href="css/style.css?v=10">
+<link rel="stylesheet" href="css/style.css?v=11">
 </head>
 <body>
 
@@ -226,11 +226,16 @@
   <aside class="logpanel" id="bj-logpanel"><div class="log-head">Oyun Kaydı</div><ul id="bj-log"></ul></aside>
 </section>
 
-<script src="js/sfx.js?v=10"></script>
-<script src="js/speed.js?v=10"></script>
-<script src="js/cards.js?v=10"></script>
-<script src="js/poker.js?v=10"></script>
-<script src="js/blackjack.js?v=10"></script>
-<script src="js/app.js?v=10"></script>
+<!-- Kurallar ES modülü olarak yüklenir; sunucu da aynı dosyayı kullanır -->
+<script type="module">
+  import * as R from './js/rules.js?v=11';
+  window.Rules = R;
+</script>
+<script src="js/sfx.js?v=11"></script>
+<script src="js/speed.js?v=11"></script>
+<script src="js/cards.js?v=11"></script>
+<script src="js/poker.js?v=11"></script>
+<script src="js/blackjack.js?v=11"></script>
+<script src="js/app.js?v=11"></script>
 </body>
 </html>

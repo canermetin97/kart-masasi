@@ -2,30 +2,10 @@
    cards.js — deste, kart görseli ve poker el değerlendirmesi
    ============================================================ */
 
-const SUITS = [
-  { k: 'S', sym: '♠', red: false },
-  { k: 'H', sym: '♥', red: true  },
-  { k: 'D', sym: '♦', red: true  },
-  { k: 'C', sym: '♣', red: false },
-];
-const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
-
-/** Tek kart: {r:'A', s:'♥', red:true, v:14, sk:'H'} */
-function makeDeck(n = 1) {
-  const deck = [];
-  for (let d = 0; d < n; d++)
-    for (const su of SUITS)
-      RANKS.forEach((r, i) => deck.push({ r, s: su.sym, sk: su.k, red: su.red, v: i + 2 }));
-  return deck;
-}
-
-function shuffle(a) {
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+/* Deste ve karıştırma tek kaynaktan gelir (js/rules.js).
+   Bu dosya yalnızca çizim ve poker el değerlendirmesinden sorumlu. */
+const makeDeck = (n = 1) => Rules.makeDeck(n);
+const shuffle = a => Rules.shuffle(a);
 
 /** DOM kart elemanı. opts: {small, faceDown, win, dim} */
 function cardEl(card, opts = {}) {
