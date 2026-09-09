@@ -42,6 +42,8 @@ body{
 .screen{position:fixed; inset:0; display:none; flex-direction:column}
 .screen.active{display:flex}
 .hidden{display:none !important}
+/* hidden özniteliği her zaman kazansın — .lobby{display:flex} gibi kurallar onu ezmesin */
+[hidden]{display:none !important}
 
 /* ---------- Butonlar ---------- */
 .btn{
@@ -516,4 +518,51 @@ body{
   .topbar-info{order:3; width:100%; justify-content:center; gap:12px}
   .topbar .btn.small{padding:7px 9px; font-size:12px; min-height:32px}
   .topbar-right{gap:5px; flex-wrap:wrap; justify-content:flex-end}
+}
+
+/* ============================================================
+   Çevrimiçi masa: lobi, oda kodu, süre göstergesi
+   ============================================================ */
+.or{display:flex; align-items:center; gap:12px; width:100%; max-width:460px; color:var(--gold-dim); font-size:12px}
+.or::before, .or::after{content:''; flex:1; height:1px; background:var(--line)}
+
+.code-badge{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:2px;
+  padding:3px 10px; border-radius:8px; color:var(--gold);
+  background:rgba(233,201,141,.1); border:1px solid var(--line);
+}
+.clock{
+  padding:3px 10px; border-radius:20px; font-size:12px; font-variant-numeric:tabular-nums;
+  background:rgba(255,255,255,.06); border:1px solid var(--line); color:#d8c0bb;
+}
+.clock.urgent{background:rgba(255,75,92,.2); border-color:var(--red-hi); color:#fff}
+
+.lobby{
+  position:absolute; inset:0; z-index:30; display:flex; align-items:center; justify-content:center;
+  background:rgba(10,2,4,.82); backdrop-filter:blur(6px); padding:16px;
+}
+.lobby-box{
+  width:min(420px,100%); max-height:100%; overflow:auto;
+  display:flex; flex-direction:column; align-items:center; gap:12px;
+  padding:22px 20px; border-radius:20px;
+  background:linear-gradient(160deg,#4a0c18,#22050b);
+  border:1px solid var(--line); box-shadow:var(--shadow);
+}
+.lobby-code{font-size:12px; letter-spacing:2px; color:var(--gold-dim); text-align:center}
+.lobby-code b{
+  display:block; margin-top:6px; font-size:36px; letter-spacing:8px; color:#fff;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.lobby-players{list-style:none; margin:0; padding:0; width:100%; display:flex; flex-direction:column; gap:5px}
+.lobby-players li{
+  padding:8px 12px; border-radius:10px; font-size:13.5px; color:#d8c0bb;
+  background:rgba(0,0,0,.28); border:1px solid rgba(233,201,141,.12);
+}
+.lobby-players li.me{color:var(--cream); border-color:var(--gold)}
+.lobby-wait{margin:2px 0 0; color:var(--gold-dim); font-size:12.5px; text-align:center}
+#bj-lobby-host{width:100%; display:flex; flex-direction:column; align-items:center; gap:12px}
+
+@media (orientation:portrait) and (max-width:820px){
+  .lobby-code b{font-size:30px; letter-spacing:6px}
+  .lobby-box{padding:18px 14px; gap:10px}
 }

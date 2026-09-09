@@ -15,7 +15,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 
-<link rel="stylesheet" href="css/style.css?v=11">
+<link rel="stylesheet" href="css/style.css?v=13">
 </head>
 <body>
 
@@ -40,6 +40,12 @@
         <div class="gc-icon"><span class="s-red">♦</span><span>♣</span></div>
         <h2>Blackjack</h2>
         <p>3–6 kişilik masa · 6 deste<br>Double · Split · Sigorta yok</p>
+        <span class="gc-go">Oyna</span>
+      </button>
+      <button class="game-card" data-game="online">
+        <div class="gc-icon"><span class="s-red">♦</span><span>♠</span></div>
+        <h2>Çevrimiçi Blackjack</h2>
+        <p>2–4 kişi, ayrı cihazlardan<br>Oda kodu paylaş, birlikte oyna</p>
         <span class="gc-go">Oyna</span>
       </button>
     </div>
@@ -98,6 +104,33 @@
     </div>
 
     <button class="btn primary big" id="setup-start">Masaya Otur</button>
+  </div>
+</section>
+
+<!-- ==================== ÇEVRİMİÇİ KURULUM ==================== -->
+<section id="screen-online" class="screen">
+  <div class="menu-wrap">
+    <button class="btn ghost back-btn" data-goto="menu">‹ Geri</button>
+    <h2 class="setup-title">Çevrimiçi Blackjack</h2>
+
+    <div class="field">
+      <label>Adın</label>
+      <input id="ol-name" type="text" maxlength="12" value="Sen" autocomplete="off">
+    </div>
+
+    <button class="btn primary big" id="ol-create">Yeni Oda Kur</button>
+    <div class="or"><span>veya</span></div>
+
+    <div class="field">
+      <label>Oda kodu</label>
+      <input id="ol-code" type="text" maxlength="8" placeholder="ABCDE"
+             autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </div>
+    <button class="btn big" id="ol-join">Odaya Katıl</button>
+
+    <p class="footnote" id="ol-status"></p>
+    <p class="footnote">Masayı kuran kişi koltuk sayısını ve jetonu belirler.
+      En fazla 4 gerçek kişi oturur, kalan koltuklarda bot oynar.</p>
   </div>
 </section>
 
@@ -171,6 +204,8 @@
     <div class="topbar-info">
       <span>El <b id="bj-hand">1</b></span>
       <span>Deste <b id="bj-shoe">6</b></span>
+      <span class="code-badge" id="bj-code-badge" hidden></span>
+      <span class="clock" id="bj-clock" hidden></span>
       <span class="stage-badge" id="bj-stage">Bahis</span>
     </div>
     <div class="topbar-right">
@@ -223,19 +258,50 @@
     <button class="btn primary big hidden" id="bj-next">Sonraki El</button>
   </footer>
 
+  <div class="lobby" id="bj-lobby" hidden>
+    <div class="lobby-box">
+      <div class="lobby-code">ODA KODU <b id="bj-code">—</b></div>
+      <button class="btn ghost small" id="bj-copy">Kodu kopyala</button>
+      <ul class="lobby-players" id="bj-lobby-players"></ul>
+
+      <div id="bj-lobby-host" hidden>
+        <div class="field">
+          <label>Koltuk sayısı</label>
+          <div class="chip-row" id="ol-seats">
+            <button class="chip-btn" data-v="3">3</button>
+            <button class="chip-btn selected" data-v="4">4</button>
+            <button class="chip-btn" data-v="5">5</button>
+            <button class="chip-btn" data-v="6">6</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Başlangıç jetonu</label>
+          <div class="chip-row" id="ol-stack">
+            <button class="chip-btn" data-v="500">500</button>
+            <button class="chip-btn selected" data-v="1000">1.000</button>
+            <button class="chip-btn" data-v="2500">2.500</button>
+          </div>
+        </div>
+        <button class="btn primary big" id="bj-start-online">Oyunu Başlat</button>
+      </div>
+      <p class="lobby-wait" id="bj-lobby-wait">Masayı kuran kişinin başlatması bekleniyor…</p>
+    </div>
+  </div>
+
   <aside class="logpanel" id="bj-logpanel"><div class="log-head">Oyun Kaydı</div><ul id="bj-log"></ul></aside>
 </section>
 
 <!-- Kurallar ES modülü olarak yüklenir; sunucu da aynı dosyayı kullanır -->
 <script type="module">
-  import * as R from './js/rules.js?v=11';
+  import * as R from './js/rules.js?v=13';
   window.Rules = R;
 </script>
-<script src="js/sfx.js?v=11"></script>
-<script src="js/speed.js?v=11"></script>
-<script src="js/cards.js?v=11"></script>
-<script src="js/poker.js?v=11"></script>
-<script src="js/blackjack.js?v=11"></script>
-<script src="js/app.js?v=11"></script>
+<script src="js/sfx.js?v=13"></script>
+<script src="js/speed.js?v=13"></script>
+<script src="js/cards.js?v=13"></script>
+<script src="js/poker.js?v=13"></script>
+<script src="js/blackjack.js?v=13"></script>
+<script src="js/online.js?v=13"></script>
+<script src="js/app.js?v=13"></script>
 </body>
 </html>

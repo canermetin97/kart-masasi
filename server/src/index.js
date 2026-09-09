@@ -63,6 +63,9 @@ export class Table {
     let p = T.players.find(x => x.id === id);
 
     if (p) {                                   // yeniden bağlanma
+      for (const [old, oid] of this.sockets) {  // aynı kimlikle eski soket varsa kapat
+        if (oid === id) { this.sockets.delete(old); try { old.close(1000, 'yeni bağlantı'); } catch {} }
+      }
       p.connected = true;
       p.name = name;
     } else {

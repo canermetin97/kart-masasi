@@ -359,9 +359,11 @@ function render() {
   $('bj-dealer-total').textContent =
     S.dealer.cards.length === 0 ? '' : S.dealer.hole ? `· ${bjValue(S.dealer.cards[0])}+` : `· ${dv.total}`;
 
-  $('bj-you-chips').textContent = 'Jeton: ' + fmt(S.me.chips);
-  $('bj-you-bet').textContent = S.phase === 'bet' ? 'Bahis: ' + fmt(S.pendingBet) : '';
-  $('bj-shoe').textContent = Math.max(1, Math.ceil(S.shoe.length / 52));
+  if (!S.online) {                       // çevrimiçi modda bunları online.js yazar
+    $('bj-you-chips').textContent = 'Jeton: ' + fmt(S.me.chips);
+    $('bj-you-bet').textContent = S.phase === 'bet' ? 'Bahis: ' + fmt(S.pendingBet) : '';
+  }
+  $('bj-shoe').textContent = S.decksLeft ?? Math.max(1, Math.ceil(S.shoe.length / 52));
 
   renderMyHand();
 
@@ -422,23 +424,81 @@ function renderMyHand() {
   nameEl.textContent = parts.join(' · ');
 }
 
+
+/* ---------------- çevrimiçi masa adaptörü ----------------
+   Sunucudan gelen durum, yerel S ile aynı şekilde olduğu için
+   masayı çizen kod olduğu gibi kullanılabiliyor. */
+const ONLINE_STAGE = {
+  lobby: 'Lobi', bet: 'Bahis', deal: 'Dağıtım',
+  play: 'Oyun', dealer: 'Krupiye', settle: 'Sonuç',
+};
+
+function onlinePaint(v, myId) {
+  const ids = v.players.map(p => p.id).join(',');
+  if (!S || !S.online || S.ids !== ids) {
+    token++;                                   // varsa yerel oyunun zamanlayıcılarını durdur
+    S = {
+      online: true, ids, me: null,
+      players: v.players.map(p => Object.assign({}, p, { isHuman: p.id === myId })),
+    };
+    S.me = S.players.find(p => p.id === myId) || S.players[0];
+    buildSeats();
+  }
+  v.players.forEach((sp, i) => {
+    const p = S.players[i];
+    Object.assign(p, sp);                      // p.el korunur
+    p.isHuman = p.id === myId;
+    p.winner = v.phase === 'settle' &&
+      p.hands.some(h => h.result === 'KAZANDI' || h.result === 'BLACKJACK');
+  });
+  S.me = S.players.find(p => p.id === myId) || S.players[0];
+  S.phase = v.phase;
+  S.handNo = v.handNo;
+  S.decksLeft = v.decksLeft;
+  S.dealer = v.dealer;
+  S.turnP = v.turnP;
+  S.turnH = v.turnH;
+
+  $('bj-hand').textContent = v.handNo;
+  const mine = v.phase === 'play' && v.players[v.turnP]?.id === myId;
+  $('bj-stage').textContent = mine ? 'Sıra sende' : (ONLINE_STAGE[v.phase] || '');
+  if (mine) {
+    const h = S.me.hands[v.turnH];
+    const hv = handValue(h.cards);
+    $('bj-msg').innerHTML = `<b>SIRA SENDE</b> — elin ${hv.total}${hv.soft ? ' (soft)' : ''}`;
+  } else {
+    const who = v.phase === 'play' ? v.players[v.turnP]?.name : null;
+    $('bj-msg').textContent = who ? `${who} oynuyor…` : (v.msg || '');
+  }
+  render();
+}
+
 /* ---------------- olay bağlantıları ---------------- */
 function bind() {
+  const on = () => typeof Online !== 'undefined' && Online.isActive();
+
   document.querySelectorAll('#bj-bet-buttons [data-bet]').forEach(b => b.onclick = () => {
+    SFX.chip();
+    if (on()) return Online.addBet(+b.dataset.bet);
     if (!S || S.phase !== 'bet') return;
     S.pendingBet = Math.min(S.me.chips, S.pendingBet + +b.dataset.bet);
-    SFX.chip();
     render();
   });
-  $('bj-bet-clear').onclick = () => { if (S && S.phase === 'bet') { S.pendingBet = MIN_BET; render(); } };
-  $('bj-deal').onclick = () => deal();
-  $('bj-hit').onclick = () => humanMove('hit');
-  $('bj-stand').onclick = () => humanMove('stand');
-  $('bj-double').onclick = () => humanMove('double');
-  $('bj-split').onclick = () => humanMove('split');
-  $('bj-next').onclick = () => { $('bj-next').classList.add('hidden'); startBetting(); };
+  $('bj-bet-clear').onclick = () => {
+    if (on()) return Online.clearBet();
+    if (S && S.phase === 'bet') { S.pendingBet = MIN_BET; render(); }
+  };
+  $('bj-deal').onclick = () => (on() ? Online.bet() : deal());
+  $('bj-hit').onclick = () => (on() ? Online.act('hit') : humanMove('hit'));
+  $('bj-stand').onclick = () => (on() ? Online.act('stand') : humanMove('stand'));
+  $('bj-double').onclick = () => (on() ? Online.act('double') : humanMove('double'));
+  $('bj-split').onclick = () => (on() ? Online.act('split') : humanMove('split'));
+  $('bj-next').onclick = () => {
+    if (on()) return Online.again();
+    $('bj-next').classList.add('hidden'); startBetting();
+  };
   $('bj-log-toggle').onclick = () => $('bj-logpanel').classList.toggle('open');
 }
 
-return { init, stop, bind };
+return { init, stop, bind, online: { paint: onlinePaint } };
 })();

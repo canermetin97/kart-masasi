@@ -47,6 +47,7 @@ export const bjValue = c => (c.v === 14 ? 11 : Math.min(c.v, 10));
 export function handValue(cards) {
   let t = 0, aces = 0;
   for (const c of cards) {
+    if (!c) continue;                 // gizli kart (çevrimiçi masada null gelir)
     if (c.v === 14) { t += 11; aces++; }
     else t += Math.min(c.v, 10);
   }
@@ -55,7 +56,9 @@ export function handValue(cards) {
 }
 
 /** Doğal blackjack: ilk iki kart 21, split'ten gelmemiş */
-export const isBJ = h => !!h && h.cards.length === 2 && !h.fromSplit && handValue(h.cards).total === 21;
+export const isBJ = h =>
+  !!h && h.cards.length === 2 && h.cards.every(Boolean) &&
+  !h.fromSplit && handValue(h.cards).total === 21;
 
 export const canDouble = (h, chips) => h.cards.length === 2 && !h.fromSplit2 && chips >= h.bet;
 export const canSplit = (h, chips, handCount) =>
