@@ -1,5 +1,7 @@
 # Kart Masası
 
+**Canlı: https://canermetin97.github.io/kart-masasi/**
+
 Tarayıcıda çalışan, kurulum gerektirmeyen iki kart oyunu: **Texas Hold'em** ve **Blackjack**.
 Saf HTML/CSS/JavaScript — derleme adımı, paket, internet bağlantısı yok.
 
@@ -17,13 +19,8 @@ Ekran hem yatay hem dikey çalışır — dikeyde oyuncular iki sıraya sarılı
 Oyun bir **Progressive Web App**. Apple geliştirici hesabı, Xcode veya Mac bağlantısı
 gerekmez; ücretsizdir ve süresi dolmaz.
 
-**1. Ücretsiz bir yere yükle** (HTTPS şart — servis çalışanı ancak https'te çalışır):
-
-- **GitHub Pages:** repo oluştur → dosyaları push et → Settings › Pages › "Deploy from a branch" → `main` / `root`
-- **Netlify Drop:** https://app.netlify.com/drop adresine klasörü sürükle
-- **Cloudflare Pages:** "Direct Upload" ile klasörü yükle
-
-**2. iPhone'da kur:** Safari ile adresi aç → **Paylaş** → **Ana Ekrana Ekle**.
+Safari ile **https://canermetin97.github.io/kart-masasi/** adresini aç →
+**Paylaş** → **Ana Ekrana Ekle**.
 
 Ana ekranda kendi ikonuyla, tam ekran, adres çubuğu olmadan açılır ve **çevrimdışı çalışır**
 (ilk açılışta dosyalar önbelleğe alınır).
@@ -31,6 +28,20 @@ Ana ekranda kendi ikonuyla, tam ekran, adres çubuğu olmadan açılır ve **çe
 > Aynı Wi-Fi'da hızlı denemek için: `python3 -m http.server 4321 --bind 0.0.0.0` çalıştır,
 > telefondan `http://<mac-ip>:4321` adresini aç. Bu yol http olduğu için çevrimdışı çalışmaz,
 > sadece görünümü test etmek içindir.
+
+## Değişiklik yayınlamak
+
+Yayın GitHub Pages üzerinde, `main` dalının köküne bağlı. Push ettiğin an derleme başlar,
+30-60 saniye içinde canlıya çıkar:
+
+```bash
+git add -A
+git commit -m "değişiklik açıklaması"
+git push
+```
+
+Derlemenin durumunu görmek için: `gh api /repos/canermetin97/kart-masasi/pages --jq .status`
+(`building` → `built`).
 
 ### Dosya sürümleri
 
