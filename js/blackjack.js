@@ -210,6 +210,7 @@ function deal() {
   });
   S.dealer = { cards: [], hole: true };
   log(`— El ${S.handNo} —`, true);
+  rigShoe();                      // hile açıksa deste dağıtımdan ÖNCE düzenlenir
 
   const seq = [];
   for (let round = 0; round < 2; round++) {
@@ -225,39 +226,71 @@ function deal() {
   tick();
 }
 
-/* "feeling lucky" hilesi: sıradaki elde insan oyuncuya doğal blackjack verilir.
-   Desteden bir As ve bir onluk çekilip eldekiler desteye geri konur, yani
-   deste tutarlı kalır. Krupiye de blackjack yaparsa el berabere biteceği için
-   onun kapalı kartı da değiştirilir. Yalnızca tek kişilik masada çalışır. */
-function applyCheat() {
+/* "feeling lucky" hilesi.
+   Kartları dağıtımdan SONRA değiştirmek gözle görülüyordu (masadaki
+   kartlar bir anda başkasına dönüşüyordu). Bunun yerine dağıtım
+   başlamadan deste düzenleniyor: insanın alacağı iki kartın destedeki
+   yerine bir As ve bir onluk takas ediliyor, böylece kartlar zaten
+   blackjack olarak çıkıyor. Deste yalnızca yer değiştiriyor, kart
+   eklenip çıkarılmıyor. Yalnızca tek kişilik masada çalışır. */
+function rigShoe() {
   if (!S || !S.cheat || S.online) return;
-  const me = S.me;
-  const h = me && !me.out && me.hands[0];
-  if (!h) return;
+  const live = S.players.filter(p => !p.out);
+  const n = live.length;
+  const mi = live.indexOf(S.me);
+  if (mi < 0) return;
 
-  const cek = kosul => {
-    const i = S.shoe.findIndex(kosul);
-    return i >= 0 ? S.shoe.splice(i, 1)[0] : null;
+  const gerekli = 2 * n + 2;                 // bir elde dağıtılan kart sayısı
+  const yenile = () => { S.shoe = shuffle(makeDeck(DECKS())); log('Shoe karıştırıldı'); };
+
+  /* Desteyi düzenlemeyi dener. draw() desteyi sondan çeker, yani k. çekilen
+     kart shoe[len - k]. İnsanın iki kartının denk geldiği yerlere bir As ve
+     bir onluk takas edilir — kart eklenip çıkarılmaz, sadece yer değişir. */
+  const dene = () => {
+    const len = S.shoe.length;
+    if (len < gerekli + 4) return false;
+    const yer = k => len - k;
+    const pAs = yer(mi + 1);                 // insanın 1. kartı
+    const pOn = yer(n + mi + 2);             // insanın 2. kartı
+    const kd1 = yer(n + 1);                  // krupiyenin açık kartı
+    const kd2 = yer(2 * n + 2);              // krupiyenin kapalı kartı
+
+    const kilit = new Set([pAs, pOn]);
+    const bul = kosul => {
+      for (let i = 0; i < len; i++) if (!kilit.has(i) && kosul(S.shoe[i])) return i;
+      return -1;
+    };
+    const koy = (hedef, kosul) => {
+      if (kosul(S.shoe[hedef])) return true;
+      const kaynak = bul(kosul);
+      if (kaynak < 0) return false;
+      [S.shoe[hedef], S.shoe[kaynak]] = [S.shoe[kaynak], S.shoe[hedef]];
+      return true;
+    };
+
+    if (!koy(pAs, c => c.v === 14)) return false;
+    if (!koy(pOn, c => bjValue(c) === 10)) return false;
+
+    // krupiye de blackjack yaparsa el berabere biter; kapalı kartını değiştir
+    if (handValue([S.shoe[kd1], S.shoe[kd2]]).total === 21) {
+      kilit.add(kd1);
+      koy(kd2, c => bjValue(c) >= 2 && bjValue(c) <= 9);
+    }
+    return true;
   };
-  const as = cek(c => c.v === 14);
-  const on = cek(c => bjValue(c) === 10);
-  if (!as || !on) return;
 
-  S.shoe.push(...h.cards);
-  h.cards = [as, on];
+  // dağıtım ortasında yeniden karışırsa düzen bozulur; önden karıştır
+  if (S.shoe.length < S.reshuffleAt + gerekli) yenile();
 
-  if (handValue(S.dealer.cards).total === 21) {          // beraberliği önle
-    const yeni = cek(c => bjValue(c) >= 2 && bjValue(c) <= 9);
-    if (yeni) { S.shoe.push(S.dealer.cards[1]); S.dealer.cards[1] = yeni; }
-  }
+  // As ya da onluk kalmamış olabilir (hile destedeki As'ları tüketiyor);
+  // o durumda desteyi yenileyip bir kez daha dene
+  if (!dene()) { yenile(); if (!dene()) return; }
 
   S.cheat--;
   log(`🍀 Şans seninle — ${S.cheat} el kaldı`, true);
-  render();
 }
 
 function afterDeal() {
-  applyCheat();
   const up = S.dealer.cards[0];
   const dealerBJ = handValue(S.dealer.cards).total === 21;
   if ((bjValue(up) === 11 || bjValue(up) === 10) && dealerBJ) {
