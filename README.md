@@ -5,6 +5,19 @@
 Tarayıcıda çalışan, kurulum gerektirmeyen iki kart oyunu: **Texas Hold'em** ve **Blackjack**.
 Saf HTML/CSS/JavaScript — derleme adımı, paket, internet bağlantısı yok.
 
+## Nasıl yapıldı
+
+Mimariyi, algoritmaları ve yayına alma sürecini anlatan 4 sayfalık belge:
+[`docs/nasil-yapildi.pdf`](docs/nasil-yapildi.pdf) (kaynağı yanındaki `.html`).
+
+PDF'i yeniden üretmek için:
+
+```bash
+cd docs && "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --headless=new --no-pdf-header-footer \
+  --print-to-pdf=nasil-yapildi.pdf "file://$PWD/nasil-yapildi.html"
+```
+
 ## Çalıştırma
 
 Masaüstünde: `index.html` dosyasına çift tıkla.
