@@ -368,13 +368,27 @@ body{
 
 /* ---------- Log ---------- */
 .logpanel{
-  position:absolute; right:0; top:52px; bottom:0; width:290px; max-width:80vw;
+  /* üst bar dikey ekranda iki satıra sarıldığı için panel tepeden başlar;
+     kapatma düğmesi başlıkta duruyor */
+  position:absolute; right:0; top:0; bottom:0; width:290px; max-width:80vw;
   background:rgba(14,3,5,.94); border-left:1px solid var(--line);
   transform:translateX(100%); transition:transform .22s ease; z-index:20;
   display:flex; flex-direction:column;
 }
 .logpanel.open{transform:none}
-.log-head{padding:12px 14px; font-size:12px; letter-spacing:2px; color:var(--gold); border-bottom:1px solid var(--line)}
+.log-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:calc(12px + env(safe-area-inset-top)) 10px 12px 14px;
+  font-size:12px; letter-spacing:2px; color:var(--gold);
+  border-bottom:1px solid var(--line);
+}
+.log-close{
+  font:inherit; font-size:18px; line-height:1; letter-spacing:0;
+  width:40px; height:40px; flex:0 0 auto; cursor:pointer;
+  border-radius:10px; color:var(--cream);
+  background:rgba(255,255,255,.06); border:1px solid var(--line);
+}
+.log-close:hover{border-color:var(--red-hi)}
 .logpanel ul{list-style:none; margin:0; padding:10px 14px; overflow:auto; font-size:12.5px; line-height:1.65; color:#d8c0bb}
 .logpanel li{padding:3px 0; border-bottom:1px solid rgba(255,255,255,.04)}
 .logpanel li.hl{color:#ffd76e}

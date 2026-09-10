@@ -92,6 +92,11 @@ $('setup-start').onclick = () => {
   else { show('blackjack'); Blackjack.init(cfg); }
 };
 
+document.querySelectorAll('[data-log-close]').forEach(b => b.onclick = () => {
+  document.getElementById(b.dataset.logClose).classList.remove('open');
+  SFX.click();
+});
+
 SFX.bind();
 Speed.bind();
 Poker.bind();

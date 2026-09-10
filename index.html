@@ -15,7 +15,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 
-<link rel="stylesheet" href="css/style.css?v=31">
+<link rel="stylesheet" href="css/style.css?v=32">
 </head>
 <body>
 
@@ -194,7 +194,8 @@
     <button class="btn primary big hidden" id="pk-next">Sonraki El</button>
   </footer>
 
-  <aside class="logpanel" id="pk-logpanel"><div class="log-head">Oyun Kaydı <span data-version></span></div><ul id="pk-log"></ul></aside>
+  <aside class="logpanel" id="pk-logpanel"><div class="log-head"><span>Oyun Kaydı <span data-version></span></span>
+      <button class="log-close" data-log-close="pk-logpanel" aria-label="Kaydı kapat">✕</button></div><ul id="pk-log"></ul></aside>
 </section>
 
 <!-- ==================== BLACKJACK ==================== -->
@@ -288,20 +289,21 @@
     </div>
   </div>
 
-  <aside class="logpanel" id="bj-logpanel"><div class="log-head">Oyun Kaydı <span data-version></span></div><ul id="bj-log"></ul></aside>
+  <aside class="logpanel" id="bj-logpanel"><div class="log-head"><span>Oyun Kaydı <span data-version></span></span>
+      <button class="log-close" data-log-close="bj-logpanel" aria-label="Kaydı kapat">✕</button></div><ul id="bj-log"></ul></aside>
 </section>
 
 <!-- Kurallar ES modülü olarak yüklenir; sunucu da aynı dosyayı kullanır -->
 <script type="module">
-  import * as R from './js/rules.js?v=31';
+  import * as R from './js/rules.js?v=32';
   window.Rules = R;
 </script>
-<script src="js/sfx.js?v=31"></script>
-<script src="js/speed.js?v=31"></script>
-<script src="js/cards.js?v=31"></script>
-<script src="js/poker.js?v=31"></script>
-<script src="js/blackjack.js?v=31"></script>
-<script src="js/online.js?v=31"></script>
-<script src="js/app.js?v=31"></script>
+<script src="js/sfx.js?v=32"></script>
+<script src="js/speed.js?v=32"></script>
+<script src="js/cards.js?v=32"></script>
+<script src="js/poker.js?v=32"></script>
+<script src="js/blackjack.js?v=32"></script>
+<script src="js/online.js?v=32"></script>
+<script src="js/app.js?v=32"></script>
 </body>
 </html>
