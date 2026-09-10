@@ -361,7 +361,7 @@ export class Table {
     const T = this.T;
     T.phase = 'dealer';
     T.dealer.hole = false;
-    T.msg = 'Krupiye kartlarını açıyor…';
+    T.msg = 'Krupiye oynuyor';
     T.deadline = 0;
     this.broadcast();
 

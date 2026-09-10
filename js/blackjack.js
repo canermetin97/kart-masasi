@@ -297,7 +297,7 @@ function dealerPlay() {
   lockHuman();
   $('bj-play-buttons').classList.add('hidden');
   $('bj-stage').textContent = 'Krupiye';
-  $('bj-msg').textContent = 'Krupiye kartlarını açıyor…';
+  $('bj-msg').textContent = 'Krupiye oynuyor';
   S.dealer.hole = false;
   SFX.flip();
   render();
