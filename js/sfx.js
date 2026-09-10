@@ -68,18 +68,49 @@ const API = {
   toggle() { API.set(!enabled); },
 
   /* --- efektler --- */
-  deal(i = 0) {                       // kart masaya kayıyor
+  /* Kart masaya kayıyor: parlaktan boğuğa süzülen bir gürültü (kağıdın
+     çuha üzerinde kayması) + masaya değerken hafif bir tık. */
+  deal(i = 0) {
     if (!enabled) return;
+    const c = ac(); if (!c) return;
     const t = now() + i * 0.075;
-    noise(t, 0.09, 1800 + Math.random() * 700, 1.1, 0.16);
+    const dur = 0.15 + Math.random() * 0.03;
+
+    const len = Math.max(1, Math.floor(c.sampleRate * dur));
+    const buf = c.createBuffer(1, len, c.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let k = 0; k < len; k++) {
+      const p = k / len;
+      d[k] = (Math.random() * 2 - 1) * Math.pow(1 - p, 1.6) * (0.35 + 0.65 * Math.min(1, p * 8));
+    }
+    const src = c.createBufferSource(); src.buffer = buf;
+
+    const bp = c.createBiquadFilter();
+    bp.type = 'bandpass'; bp.Q.value = 0.8;
+    bp.frequency.setValueAtTime(5200 + Math.random() * 900, t);
+    bp.frequency.exponentialRampToValueAtTime(850, t + dur);
+
+    const hp = c.createBiquadFilter();
+    hp.type = 'highpass'; hp.frequency.value = 320;
+
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.11, t + 0.014);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+    src.connect(bp); bp.connect(hp); hp.connect(g); g.connect(c.destination);
+    src.start(t); src.stop(t + dur + 0.05);
+
+    tone(140 + Math.random() * 30, t + dur * 0.66, 0.05, 'sine', 0.045);   // masaya değme
   },
   dealMany(n) { for (let i = 0; i < n; i++) API.deal(i); },
 
-  flip() {                            // kart açılıyor
+  flip() {                            // kart açılıyor: kısa, kuru bir şak
     if (!enabled) return;
     const t = now();
-    noise(t, 0.07, 3200, 1.6, 0.13);
-    tone(880, t + 0.02, 0.06, 'triangle', 0.05);
+    noise(t, 0.05, 2600, 0.9, 0.12);
+    noise(t + 0.03, 0.06, 1200, 1.2, 0.07);
+    tone(210, t + 0.02, 0.05, 'sine', 0.05);
   },
 
   chip() {                            // jeton / bahis

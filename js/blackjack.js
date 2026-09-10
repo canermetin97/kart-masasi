@@ -43,8 +43,12 @@ function init(cfg) {
   const names = shuffle(BOT_NAMES.slice()).slice(0, cfg.count - 1);
   const bots = names.map((n, i) => ({ id: i, name: n, chips: cfg.stack, isHuman: false }));
   const me = { id: 99, name: cfg.name || 'Sen', chips: cfg.stack, isHuman: true };
+  // Dizi sırası = dağıtım sırası. İnsan, halkadaki saat 6 koltuğuna denk gelen
+  // yere konur; böylece dağıtım en sağdan başlayıp saat yönünde ilerler.
+  const seats = bots.slice();
+  seats.splice(seatRing(cfg.count).indexOf(6), 0, me);
   S = {
-    players: bots.concat([me]),      // insan en sağda (third base)
+    players: seats,
     me, handNo: 0, phase: 'bet', dealer: { cards: [] },
     shoe: shuffle(makeDeck(DECKS)),
     reshuffleAt: Math.floor(DECKS * 52 * 0.25),
@@ -66,10 +70,17 @@ function stop() { token++; S = null; }
 
    Koltuklar mutlak konumlu; bir oyuncunun eli büyüse de, sıra birine
    geçse de kimsenin kartı yerinden oynamaz. */
-/* Komşu koltuklar arasında en az 45° olsun diye saat aralıkları 1,5 saat.
-   6 kişilik masada üst köşeler (1:30 / 10:30) devreye girer. */
-const CLOCK_ORDER = [3, 9, 4.5, 7.5, 1.5, 10.5];
-const SEAT_RX = 35, SEAT_RY = 36;
+/* Koltuklar saat yönünde, en sağdan (saat 3) başlayarak dizilir.
+   Kartlar da bu sırayla dağıtılır: 3 → 4:30 → 6 → 7:30 → 9 → …
+   Oyuncu her zaman saat 6'da oturur. */
+const CLOCKWISE = {
+  3: [3, 6, 9],
+  4: [3, 4.5, 6, 9],
+  5: [3, 4.5, 6, 7.5, 9],
+  6: [1.5, 3, 4.5, 6, 7.5, 9],
+};
+const seatRing = n => CLOCKWISE[n] || CLOCKWISE[6];
+const SEAT_RX = 35, SEAT_RY = 34;
 
 /* Koltuk konumları YÜZDE ile değil, masanın ölçülen piksel boyutuna göre
    verilir. Yüzdeli "top" değerleri, kapsayıcı kutunun yüksekliği tarayıcıya
@@ -86,13 +97,24 @@ function seatOffset(clock) {
   };
 }
 
-/** Ölçülen masa boyutuna göre koltukları yerleştirir. */
+/* Masanın içindeki her şey ölçülen piksele göre yerleşir.
+   WebKit, yüksekliği belirsiz bir kapsayıcıda yüzdeli "top" değerlerini
+   sıfır kabul ediyor; bu yüzden krupiye, deste ve mesaj da tepeye
+   yığılıyordu. Piksel her tarayıcıda aynı davranır. */
+const LAYOUT = { dealer: 0.03, shoe: 0.42, msg: 0.58 };   // masa yüksekliğinin oranı
+
 function layoutSeats() {
   if (!S || !S.players) return;
   const felt = $('bj-felt');
   const r = felt.getBoundingClientRect();
   const w = r.width, h = r.height;
   if (!w || !h) return;
+
+  const put = (el, oran) => { if (el) el.style.top = Math.round(h * oran) + 'px'; };
+  put(document.querySelector('#screen-blackjack .dealer-zone'), LAYOUT.dealer);
+  const shoe = $('bj-shoe-visual');
+  if (shoe) { shoe.style.top = Math.round(h * LAYOUT.shoe) + 'px'; shoe.style.bottom = 'auto'; }
+  put($('bj-msg'), LAYOUT.msg);
   const tag = document.querySelector('#bj-logpanel [data-version]');
   if (tag && !tag.dataset.base) tag.dataset.base = tag.textContent;
   if (tag) tag.textContent = `${tag.dataset.base} · masa ${Math.round(w)}×${Math.round(h)}`;
@@ -109,10 +131,12 @@ function buildSeats() {
   wrap.innerHTML = '';
   const n = S.players.length;
   wrap.dataset.n = n;                     // kalabalık masada koltuklar daralır
+  const ring = seatRing(n);
+  const p6 = ring.indexOf(6);
   const meIdx = Math.max(0, S.players.indexOf(S.me));
   S.players.forEach((p, i) => {
-    const slot = (i - meIdx + n) % n;                   // kendim her zaman 0 → saat 6
-    p.clock = slot === 0 ? 6 : CLOCK_ORDER[slot - 1];
+    // dizideki sıra korunur (dağıtım sırası), kendim saat 6'ya döndürülür
+    p.clock = ring[(i - meIdx + p6 + n * 2) % n];
     const el = document.createElement('div');
     el.className = 'bj-seat' + (p.isHuman ? ' you' : '');
     el.innerHTML =

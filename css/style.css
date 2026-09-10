@@ -441,18 +441,23 @@ body{
     width:calc(100% / var(--cols, 3) - 6px);
   }
   .bj-seat{width:84px}
-  /* 6 kişilik masada halka sıkışır: koltuklar hem dar hem alçak olmalı */
-  .bj-seats[data-n="6"] .bj-seat{width:74px; gap:1px}
+
+  /* 4 kişiden itibaren halkada 45°'lik komşular çıkıyor; koltuk boyu
+     kısaltılmazsa 3 ile 4:30 (ve 9 ile 7:30) dikeyde birbirine değiyor. */
+  .bj-seats:not([data-n="3"]) .bj-seat{gap:1px}
+  .bj-seats:not([data-n="3"]) .bj-hand .total{min-height:10px; font-size:9px}
+  .bj-seats:not([data-n="3"]) .bj-hand .res{min-height:0; font-size:8px}
+  .bj-seats:not([data-n="3"]) .seat-plate{padding:2px 4px}
+  .bj-seats:not([data-n="3"]) .seat-name{font-size:10px}
+  .bj-seats:not([data-n="3"]) .seat-chips{font-size:9px}
+  .bj-seats:not([data-n="3"]) .seat-bet{font-size:9.5px; padding:1px 6px}
+
+  /* 6 kişilikte ayrıca yatayda da daralır */
+  .bj-seats[data-n="6"] .bj-seat{width:74px}
   .bj-seats[data-n="6"] .bj-seat .card.sm{width:25px; height:35px}
   .bj-seats[data-n="6"] .bj-seat .cards-row,
   .bj-seats[data-n="6"] .bj-seat .hand-cards{height:38px}
   .bj-seats[data-n="6"] .bj-spot{width:25px; height:35px}
-  .bj-seats[data-n="6"] .bj-hand .total{min-height:10px; font-size:9px}
-  .bj-seats[data-n="6"] .bj-hand .res{min-height:0; font-size:8px}
-  .bj-seats[data-n="6"] .seat-plate{padding:2px 4px}
-  .bj-seats[data-n="6"] .seat-name{font-size:10px}
-  .bj-seats[data-n="6"] .seat-chips{font-size:9px}
-  .bj-seats[data-n="6"] .seat-bet{font-size:9.5px; padding:1px 6px}
   .seat .seat-plate, .bj-seat .seat-plate{min-width:0; width:100%; padding:3px 5px}
   .seat-name{font-size:11px}
   .seat-chips{font-size:10px; margin-top:1px}
@@ -482,7 +487,7 @@ body{
   .bj-seat .hand-cards .card:nth-child(n+3){margin-left:-15px}
 
   /* kendi elin */
-  .my-hand{min-height:100px; margin-top:-30px; gap:4px}
+  .my-hand{min-height:100px; margin-top:-16px; gap:4px}
   .my-hand .hand-cards{height:78px; gap:6px}
   .my-hand-name{font-size:11.5px; padding:2px 10px}
   .my-hand.empty .hand-cards::before,
