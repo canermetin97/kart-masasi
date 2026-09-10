@@ -59,20 +59,34 @@ function init(cfg) {
 
 function stop() { token++; S = null; }
 
-/* Her oyuncunun masada sabit bir noktası var: alt yarıda, hafif yay şeklinde.
-   Konumlar el boyunca hiç değişmez. */
+/* Masa bir saat kadranı gibi kurulur ve konumlar HİÇ değişmez:
+     12 → krupiye
+      6 → sen (hangi cihazdan bakarsan bak, kendini hep altta görürsün)
+   diğerleri sırayla 3, 9, 4:30, 7:30, 1:30, 10:30
+
+   Koltuklar mutlak konumlu; bir oyuncunun eli büyüse de, sıra birine
+   geçse de kimsenin kartı yerinden oynamaz. */
+const CLOCK_ORDER = [3, 9, 4.5, 7.5, 1.5, 10.5];
+const SEAT_RX = 33, SEAT_RY = 33;
+
+function seatXY(clock) {
+  const a = (clock / 12) * 2 * Math.PI - Math.PI / 2;   // 12 yukarı, 3 sağ
+  return { x: 50 + SEAT_RX * Math.cos(a), y: 50 + SEAT_RY * Math.sin(a) };
+}
+
 function buildSeats() {
   const wrap = $('bj-seats');
   wrap.innerHTML = '';
   const n = S.players.length;
-  const cols = n <= 4 ? 2 : 3;
-  wrap.style.setProperty('--cols', cols);
+  const meIdx = Math.max(0, S.players.indexOf(S.me));
   S.players.forEach((p, i) => {
-    const t = ((i + 0.5) / n) * 2 - 1;                     // -1 sol .. +1 sağ
+    const slot = (i - meIdx + n) % n;                   // kendim her zaman 0 → saat 6
+    const clock = slot === 0 ? 6 : CLOCK_ORDER[slot - 1];
+    const { x, y } = seatXY(clock);
     const el = document.createElement('div');
     el.className = 'bj-seat' + (p.isHuman ? ' you' : '');
-    el.style.left = (50 + t * 37) + '%';
-    el.style.bottom = (5 + Math.pow(Math.abs(t), 1.7) * 9) + '%';
+    el.style.left = x + '%';
+    el.style.top = y + '%';
     el.innerHTML =
       `<div class="hands"></div>
        <div class="seat-plate">
@@ -253,9 +267,8 @@ function humanTurn(h) {
   $('bj-stand').disabled = false;
   $('bj-double').disabled = !canDouble(S.me, h);
   $('bj-split').disabled = !canSplit(S.me, h);
-  const v = handValue(h.cards);
-  // tek satırda kalmalı: uzun mesaj dar ekranda oyuncuların kartlarını örtüyor
-  $('bj-msg').innerHTML = `<b>SIRA SENDE</b> — elin ${v.total}${v.soft ? ' (soft)' : ''}`;
+  // kısa tut: masa mesajı dar bir kutu, elin toplamı zaten kartlarının altında
+  $('bj-msg').innerHTML = '<b>SIRA SENDE</b>';
   $('bj-stage').textContent = 'Sıra sende';
 }
 
@@ -326,8 +339,8 @@ function settle() {
   });
 
   $('bj-stage').textContent = 'Sonuç';
-  const txt = mine > 0 ? `Kazandın! +${fmt(mine)}` : mine < 0 ? `Kaybettin: ${fmt(mine)}` : 'Berabere (push)';
-  $('bj-msg').textContent = `Krupiye ${dv > 21 ? 'battı' : dv} — ${txt}`;
+  const txt = mine > 0 ? `+${fmt(mine)}` : mine < 0 ? fmt(mine) : 'push';
+  $('bj-msg').textContent = `Krupiye ${dv > 21 ? 'battı' : dv} · ${txt}`;
   log(`Krupiye ${dv} · sen ${mine >= 0 ? '+' : ''}${fmt(mine)}`, true);
   SFX.chips();
   setTimeout(() => (mine > 0 ? SFX.win() : mine < 0 ? SFX.lose() : SFX.push()), 320);
@@ -463,9 +476,7 @@ function onlinePaint(v, myId) {
   const mine = v.phase === 'play' && v.players[v.turnP]?.id === myId;
   $('bj-stage').textContent = mine ? 'Sıra sende' : (ONLINE_STAGE[v.phase] || '');
   if (mine) {
-    const h = S.me.hands[v.turnH];
-    const hv = handValue(h.cards);
-    $('bj-msg').innerHTML = `<b>SIRA SENDE</b> — elin ${hv.total}${hv.soft ? ' (soft)' : ''}`;
+    $('bj-msg').innerHTML = '<b>SIRA SENDE</b>';
   } else {
     const who = v.phase === 'play' ? v.players[v.turnP]?.name : null;
     $('bj-msg').textContent = who ? `${who} oynuyor…` : (v.msg || '');
