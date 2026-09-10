@@ -1,22 +1,22 @@
 /* Kart Masası — çevrimdışı çalışma için servis çalışanı.
    ASSETS listesindeki ?v= sürümleri index.html ile birebir aynı olmalı;
    sürüm artınca yeni önbellek oluşur ve eskisi silinir. */
-const VERSION = 'v14';
+const VERSION = 'v15';
 const CACHE = 'kartmasasi-' + VERSION;
 
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './css/style.css?v=14',
-  './js/rules.js?v=14',
-  './js/sfx.js?v=14',
-  './js/speed.js?v=14',
-  './js/cards.js?v=14',
-  './js/poker.js?v=14',
-  './js/blackjack.js?v=14',
-  './js/online.js?v=14',
-  './js/app.js?v=14',
+  './css/style.css?v=15',
+  './js/rules.js?v=15',
+  './js/sfx.js?v=15',
+  './js/speed.js?v=15',
+  './js/cards.js?v=15',
+  './js/poker.js?v=15',
+  './js/blackjack.js?v=15',
+  './js/online.js?v=15',
+  './js/app.js?v=15',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
@@ -25,7 +25,8 @@ const ASSETS = [
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
-      .then(c => c.addAll(ASSETS))
+      // cache:'reload' → tarayıcının HTTP önbelleğini atla, dosyaların tazesini al
+      .then(c => c.addAll(ASSETS.map(u => new Request(u, { cache: 'reload' }))))
       .then(() => self.skipWaiting())
   );
 });
@@ -42,6 +43,25 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || !req.url.startsWith(self.location.origin)) return;
 
+  /* Sayfanın kendisi: ÖNCE AĞ.
+     index.html sürüm etiketi taşımadığı için önce-önbellek yapılırsa uygulama
+     kendi güncellemesini asla göremez — eski sürümde kilitli kalır.
+     Çevrimdışıyken önbellekteki kopyaya düşer. */
+  if (req.mode === 'navigate') {
+    e.respondWith(
+      fetch(req)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put('./index.html', copy)).catch(() => {});
+          return res;
+        })
+        .catch(() => caches.match('./index.html').then(hit => hit || caches.match('./')))
+    );
+    return;
+  }
+
+  /* Sürümlü dosyalar (?v=N) değişmez: önbellek yeterli.
+     Sürüm artınca URL değişir, dolayısıyla yenisi ağdan çekilir. */
   e.respondWith(
     caches.match(req).then(hit => {
       if (hit) return hit;
@@ -51,7 +71,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
         }
         return res;
-      }).catch(() => (req.mode === 'navigate' ? caches.match('./index.html') : undefined));
+      }).catch(() => undefined);
     })
   );
 });

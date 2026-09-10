@@ -62,16 +62,16 @@ function flyIn(el, fromEl, ms) {
   if (!src.width || !dst.width) return;
   const dx = (src.left + src.width / 2) - (dst.left + dst.width / 2);
   const dy = (src.top + src.height / 2) - (dst.top + dst.height / 2);
+  // .flying kalıcıdır: kartın giriş animasyonunu kapatır. Sınıf sonradan
+  // kaldırılırsa animation-name none→deal olur ve kart yerine oturduktan
+  // sonra bir daha canlanır — kartlar titrer, iki kez dağıtılmış gibi görünür.
   el.classList.add('flying');
   el.style.transition = 'none';
   el.style.transform = `translate(${dx}px, ${dy}px) scale(.66) rotate(-14deg)`;
   void el.offsetWidth;
   el.style.transition = `transform ${ms}ms cubic-bezier(.2,.75,.28,1)`;
   el.style.transform = 'translate(0,0) scale(1) rotate(0deg)';
-  setTimeout(() => {
-    el.classList.remove('flying');
-    el.style.transition = ''; el.style.transform = '';
-  }, ms + 60);
+  setTimeout(() => { el.style.transition = ''; el.style.transform = ''; }, ms + 60);
 }
 
 const fmt = n => Math.round(n).toLocaleString('tr-TR');

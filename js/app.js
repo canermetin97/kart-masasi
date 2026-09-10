@@ -98,8 +98,19 @@ document.querySelectorAll('.game-card, .chip-btn, #setup-start, [data-goto]').fo
 
 // Çevrimdışı çalışma (yalnızca http/https üzerinde; file:// açılışta atlanır)
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  // Yeni servis çalışanı devraldığında sayfayı bir kez tazele ki
+  // kullanıcı eski sürümde takılı kalmasın.
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloaded) return;
+    reloaded = true;
+    location.reload();
+  });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => reg.update().catch(() => {}))
+      .catch(() => {});
   });
 }
 })();
