@@ -35,7 +35,7 @@ export function shuffle(a, rnd = Math.random) {
 
 export const BJ = {
   DECKS: 6,
-  MIN_BET: 10,
+  MIN_BET: 50,
   /** shoe bu sayının altına düşünce yeniden karıştırılır (%25 kesme kartı) */
   get RESHUFFLE_AT() { return Math.floor(this.DECKS * 52 * 0.25); },
 };

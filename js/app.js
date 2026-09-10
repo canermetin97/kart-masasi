@@ -97,6 +97,40 @@ document.querySelectorAll('[data-log-close]').forEach(b => b.onclick = () => {
   SFX.click();
 });
 
+/* Kayıt panelini ikinci kez açınca altta küçük bir kutu beliriyor. */
+let logAcilis = 0;
+const cheatKutusu = () => $('bj-cheat');
+$('bj-log-toggle').addEventListener('click', () => {
+  // bu dinleyici, paneli açıp kapatan işleyiciden ÖNCE çalışıyor;
+  // durumu bir tur sonra okuyoruz ki açılışı doğru sayalım
+  setTimeout(() => {
+    if (!$('bj-logpanel').classList.contains('open')) return;   // kapanış sayılmaz
+    if (++logAcilis >= 2) cheatKutusu().hidden = false;
+  }, 0);
+});
+
+$('bj-cheat').addEventListener('submit', e => {
+  e.preventDefault();
+  const kutu = $('bj-cheat-input');
+  const mesaj = $('bj-cheat-msg');
+  const soz = kutu.value.trim().toLowerCase().replace(/\s+/g, ' ');
+  if (soz === 'feeling lucky') {
+    if (typeof Online !== 'undefined' && Online.isActive()) {
+      mesaj.textContent = 'Çevrimiçi masada çalışmaz.';
+    } else if (Blackjack.luck(3)) {
+      mesaj.textContent = '🍀 Sıradaki 3 el senin.';
+      SFX.win();
+      $('bj-logpanel').classList.remove('open');
+    } else {
+      mesaj.textContent = 'Önce bir masaya otur.';
+    }
+  } else {
+    mesaj.textContent = 'Olmadı.';
+  }
+  kutu.value = '';
+  setTimeout(() => (mesaj.textContent = ''), 2600);
+});
+
 SFX.bind();
 Speed.bind();
 Poker.bind();

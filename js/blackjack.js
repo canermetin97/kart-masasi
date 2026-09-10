@@ -8,7 +8,11 @@ const Blackjack = (() => {
 const BOT_NAMES = ['Cem', 'Zeynep', 'Murat', 'Elif', 'Kaan', 'Deniz', 'Selin', 'Emre', 'Burak'];
 /* Kurallar js/rules.js'ten gelir — çevrimiçi masayı çalıştıran sunucu da
    aynı dosyayı kullanır, böylece iki mod birebir aynı oynar. */
-const DECKS = 6, MIN_BET = 10;
+/* Deste sayısı ve asgari bahis tek kaynaktan (js/rules.js) okunur —
+   sunucu da aynı değerleri kullanıyor. Rules modül olarak sonradan
+   yüklendiği için parse anında değil çağrı anında erişiliyor. */
+const DECKS = () => Rules.BJ.DECKS;
+const MIN_BET = () => Rules.BJ.MIN_BET;
 
 let S = null, token = 0;
 const $ = id => document.getElementById(id);
@@ -31,7 +35,7 @@ function log(text, hl) {
 
 function draw() {
   if (S.shoe.length < S.reshuffleAt) {
-    S.shoe = shuffle(makeDeck(DECKS));
+    S.shoe = shuffle(makeDeck(DECKS()));
     log('Shoe karıştırıldı');
   }
   return S.shoe.pop();
@@ -50,12 +54,12 @@ function init(cfg) {
   S = {
     players: seats,
     me, handNo: 0, phase: 'bet', dealer: { cards: [] },
-    shoe: shuffle(makeDeck(DECKS)),
-    reshuffleAt: Math.floor(DECKS * 52 * 0.25),
-    pendingBet: Math.min(MIN_BET * 2, cfg.stack),
+    shoe: shuffle(makeDeck(DECKS())),
+    reshuffleAt: Math.floor(DECKS() * 52 * 0.25),
+    pendingBet: Math.min(MIN_BET() * 2, cfg.stack),
   };
   S.players.forEach(p => Object.assign(p, { hands: [], bet: 0, out: false }));
-  $('bj-shoe').textContent = DECKS;
+  $('bj-shoe').textContent = DECKS();
   $('bj-log').innerHTML = '';
   buildSeats();
   startBetting();
@@ -169,11 +173,11 @@ function startBetting() {
   S.dealer = { cards: [], hole: true };
   S.players.forEach(p => {
     p.hands = []; p.bet = 0; p.winner = false;
-    p.out = p.chips < MIN_BET;
+    p.out = p.chips < MIN_BET();
   });
   if (S.me.out) { gameOver(); return; }
 
-  S.pendingBet = Math.max(MIN_BET, Math.min(S.pendingBet, S.me.chips));
+  S.pendingBet = Math.max(MIN_BET(), Math.min(S.pendingBet, S.me.chips));
   $('bj-hand').textContent = S.handNo;
   $('bj-stage').textContent = 'Bahis';
   $('bj-msg').textContent = 'Bahsini koy ve “Dağıt”a bas.';
@@ -184,14 +188,14 @@ function startBetting() {
 }
 
 function botBet(p) {
-  const base = Math.max(MIN_BET, Math.round(p.chips * (0.02 + Math.random() * 0.05) / MIN_BET) * MIN_BET);
+  const base = Math.max(MIN_BET(), Math.round(p.chips * (0.02 + Math.random() * 0.05) / MIN_BET()) * MIN_BET());
   return Math.min(base, p.chips);
 }
 
 /* ---------------- dağıtım ---------------- */
 function deal() {
   if (S.phase !== 'bet') return;
-  if (S.pendingBet < MIN_BET || S.pendingBet > S.me.chips) return;
+  if (S.pendingBet < MIN_BET() || S.pendingBet > S.me.chips) return;
 
   S.phase = 'deal';
   $('bj-bet-buttons').classList.add('hidden');
@@ -221,7 +225,39 @@ function deal() {
   tick();
 }
 
+/* "feeling lucky" hilesi: sıradaki elde insan oyuncuya doğal blackjack verilir.
+   Desteden bir As ve bir onluk çekilip eldekiler desteye geri konur, yani
+   deste tutarlı kalır. Krupiye de blackjack yaparsa el berabere biteceği için
+   onun kapalı kartı da değiştirilir. Yalnızca tek kişilik masada çalışır. */
+function applyCheat() {
+  if (!S || !S.cheat || S.online) return;
+  const me = S.me;
+  const h = me && !me.out && me.hands[0];
+  if (!h) return;
+
+  const cek = kosul => {
+    const i = S.shoe.findIndex(kosul);
+    return i >= 0 ? S.shoe.splice(i, 1)[0] : null;
+  };
+  const as = cek(c => c.v === 14);
+  const on = cek(c => bjValue(c) === 10);
+  if (!as || !on) return;
+
+  S.shoe.push(...h.cards);
+  h.cards = [as, on];
+
+  if (handValue(S.dealer.cards).total === 21) {          // beraberliği önle
+    const yeni = cek(c => bjValue(c) >= 2 && bjValue(c) <= 9);
+    if (yeni) { S.shoe.push(S.dealer.cards[1]); S.dealer.cards[1] = yeni; }
+  }
+
+  S.cheat--;
+  log(`🍀 Şans seninle — ${S.cheat} el kaldı`, true);
+  render();
+}
+
 function afterDeal() {
+  applyCheat();
   const up = S.dealer.cards[0];
   const dealerBJ = handValue(S.dealer.cards).total === 21;
   if ((bjValue(up) === 11 || bjValue(up) === 10) && dealerBJ) {
@@ -409,8 +445,8 @@ function settle() {
   setTimeout(() => (mine > 0 ? SFX.win() : mine < 0 ? SFX.lose() : SFX.push()), 320);
   render();
 
-  S.players.forEach(p => { if (p.chips < MIN_BET) p.out = true; });
-  if (S.me.chips < MIN_BET) later(gameOver, 1500);
+  S.players.forEach(p => { if (p.chips < MIN_BET()) p.out = true; });
+  if (S.me.chips < MIN_BET()) later(gameOver, 1500);
   else $('bj-next').classList.remove('hidden');
 }
 
@@ -560,7 +596,7 @@ function bind() {
   });
   $('bj-bet-clear').onclick = () => {
     if (on()) return Online.clearBet();
-    if (S && S.phase === 'bet') { S.pendingBet = MIN_BET; render(); }
+    if (S && S.phase === 'bet') { S.pendingBet = MIN_BET(); render(); }
   };
   $('bj-deal').onclick = () => (on() ? Online.bet() : deal());
   $('bj-hit').onclick = () => (on() ? Online.act('hit') : humanMove('hit'));
@@ -574,5 +610,10 @@ function bind() {
   $('bj-log-toggle').onclick = () => $('bj-logpanel').classList.toggle('open');
 }
 
-return { init, stop, bind, online: { paint: onlinePaint } };
+return {
+  init, stop, bind,
+  online: { paint: onlinePaint },
+  /** Hile: sıradaki n elde doğal blackjack. Çevrimiçi masada çalışmaz. */
+  luck(n) { if (S && !S.online) { S.cheat = (S.cheat || 0) + n; return true; } return false; },
+};
 })();

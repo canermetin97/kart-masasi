@@ -15,7 +15,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 
-<link rel="stylesheet" href="css/style.css?v=32">
+<link rel="stylesheet" href="css/style.css?v=35">
 </head>
 <body>
 
@@ -244,9 +244,9 @@
       <span id="bj-you-bet"></span>
     </div>
     <div class="act-buttons" id="bj-bet-buttons">
-      <button class="btn" data-bet="10">+10</button>
-      <button class="btn" data-bet="25">+25</button>
+      <button class="btn" data-bet="50">+50</button>
       <button class="btn" data-bet="100">+100</button>
+      <button class="btn" data-bet="250">+250</button>
       <button class="btn ghost" id="bj-bet-clear">Sıfırla</button>
       <button class="btn primary" id="bj-deal">Dağıt</button>
     </div>
@@ -290,20 +290,27 @@
   </div>
 
   <aside class="logpanel" id="bj-logpanel"><div class="log-head"><span>Oyun Kaydı <span data-version></span></span>
-      <button class="log-close" data-log-close="bj-logpanel" aria-label="Kaydı kapat">✕</button></div><ul id="bj-log"></ul></aside>
+      <button class="log-close" data-log-close="bj-logpanel" aria-label="Kaydı kapat">✕</button></div><ul id="bj-log"></ul>
+    <form class="cheat-box" id="bj-cheat" hidden autocomplete="off">
+      <input id="bj-cheat-input" type="text" maxlength="24" placeholder="…"
+             autocomplete="off" autocapitalize="none" spellcheck="false">
+      <button class="btn primary small" type="submit">Uygula</button>
+      <div class="cheat-msg" id="bj-cheat-msg"></div>
+    </form>
+  </aside>
 </section>
 
 <!-- Kurallar ES modülü olarak yüklenir; sunucu da aynı dosyayı kullanır -->
 <script type="module">
-  import * as R from './js/rules.js?v=32';
+  import * as R from './js/rules.js?v=35';
   window.Rules = R;
 </script>
-<script src="js/sfx.js?v=32"></script>
-<script src="js/speed.js?v=32"></script>
-<script src="js/cards.js?v=32"></script>
-<script src="js/poker.js?v=32"></script>
-<script src="js/blackjack.js?v=32"></script>
-<script src="js/online.js?v=32"></script>
-<script src="js/app.js?v=32"></script>
+<script src="js/sfx.js?v=35"></script>
+<script src="js/speed.js?v=35"></script>
+<script src="js/cards.js?v=35"></script>
+<script src="js/poker.js?v=35"></script>
+<script src="js/blackjack.js?v=35"></script>
+<script src="js/online.js?v=35"></script>
+<script src="js/app.js?v=35"></script>
 </body>
 </html>

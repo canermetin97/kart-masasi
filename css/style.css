@@ -283,8 +283,8 @@ body{
 .felt.bj .board-msg{
   /* halkanın boş bandı: destenin altı, 3/9 ve 4:30/7:30 koltuklarının arası */
   position:absolute; left:50%; top:55%; transform:translate(-50%,-50%);
-  width:min(33%,280px); z-index:2;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  width:min(42%,300px); z-index:2;
+  line-height:1.35;                       /* uzun mesaj iki satıra sarılsın */
   background:rgba(14,3,6,.9); border:1px solid var(--line);
   border-radius:12px; padding:4px 10px;
 }
@@ -521,8 +521,7 @@ body{
   .dealer-name{font-size:10.5px; letter-spacing:1.8px; padding:3px 10px}
   /* mesaj halkanın ortasında, destenin altında */
   .felt.bj .board-msg{
-    top:55%; bottom:auto; font-size:11px; width:min(34%,200px); z-index:6;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    top:55%; bottom:auto; font-size:11px; width:min(42%,210px); z-index:6;
     background:rgba(14,3,6,.9); border:1px solid var(--line);
     border-radius:12px; padding:4px 8px;
   }
@@ -609,3 +608,17 @@ body{
   .lobby-code b{font-size:30px; letter-spacing:6px}
   .lobby-box{padding:18px 14px; gap:10px}
 }
+
+/* Kayıt panelinin altındaki küçük kutu (ikinci açılışta beliriyor) */
+.cheat-box{
+  display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+  padding:10px 14px calc(12px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--line); background:rgba(0,0,0,.25);
+}
+.cheat-box input{
+  flex:1 1 120px; min-width:0; font:inherit; font-size:13px;
+  padding:9px 11px; border-radius:9px; color:var(--cream);
+  background:#210609; border:1px solid var(--line); outline:none;
+}
+.cheat-box input:focus{border-color:var(--red-hi)}
+.cheat-msg{flex:1 0 100%; min-height:16px; font-size:12px; color:var(--gold)}
