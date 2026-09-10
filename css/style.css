@@ -291,7 +291,7 @@ body{
 .felt.bj .board-msg b{color:#fff; letter-spacing:1.5px}
 
 /* oyuncu noktaları: masanın alt yarısında, sabit konumlarda */
-.bj-seats{position:absolute; inset:0}
+.bj-seats{position:absolute; top:0; left:0; width:100%; height:100%}
 .bj-seats[data-n="6"] .bj-seat{width:108px}
 .bj-seat{
   position:absolute; transform:translate(-50%,-50%); width:124px;

@@ -71,14 +71,37 @@ function stop() { token++; S = null; }
 const CLOCK_ORDER = [3, 9, 4.5, 7.5, 1.5, 10.5];
 const SEAT_RX = 35, SEAT_RY = 36;
 
-function seatXY(clock) {
+/* Koltuk konumları YÜZDE ile değil, masanın ölçülen piksel boyutuna göre
+   verilir. Yüzdeli "top" değerleri, kapsayıcı kutunun yüksekliği tarayıcıya
+   göre farklı hesaplandığında (iOS Safari'de olduğu gibi) sıfıra düşüp bütün
+   koltukları üst üste bindiriyordu. Piksel her yerde aynı davranır. */
+function seatOffset(clock) {
   const a = (clock / 12) * 2 * Math.PI - Math.PI / 2;   // 12 yukarı, 3 sağ
-  // Üst köşedeki koltuklar (1:30 / 10:30) krupiyenin kart sırasına girmesin diye
+  // Üst köşedeki koltuklar krupiyenin kart sırasına girmesin diye
   // daha dışa ve daha aşağıya alınır.
   const ust = Math.sin(a) < -0.3;
-  const rx = ust ? 40 : SEAT_RX;
-  const ry = ust ? 30 : SEAT_RY;
-  return { x: 50 + rx * Math.cos(a), y: 50 + ry * Math.sin(a) };
+  return {
+    fx: (ust ? 40 : SEAT_RX) * Math.cos(a) / 100,
+    fy: (ust ? 30 : SEAT_RY) * Math.sin(a) / 100,
+  };
+}
+
+/** Ölçülen masa boyutuna göre koltukları yerleştirir. */
+function layoutSeats() {
+  if (!S || !S.players) return;
+  const felt = $('bj-felt');
+  const r = felt.getBoundingClientRect();
+  const w = r.width, h = r.height;
+  if (!w || !h) return;
+  const tag = document.querySelector('#bj-logpanel [data-version]');
+  if (tag && !tag.dataset.base) tag.dataset.base = tag.textContent;
+  if (tag) tag.textContent = `${tag.dataset.base} · masa ${Math.round(w)}×${Math.round(h)}`;
+  S.players.forEach(p => {
+    if (!p.el || !p.clock) return;
+    const { fx, fy } = seatOffset(p.clock);
+    p.el.style.left = Math.round(w / 2 + fx * w) + 'px';
+    p.el.style.top = Math.round(h / 2 + fy * h) + 'px';
+  });
 }
 
 function buildSeats() {
@@ -89,12 +112,9 @@ function buildSeats() {
   const meIdx = Math.max(0, S.players.indexOf(S.me));
   S.players.forEach((p, i) => {
     const slot = (i - meIdx + n) % n;                   // kendim her zaman 0 → saat 6
-    const clock = slot === 0 ? 6 : CLOCK_ORDER[slot - 1];
-    const { x, y } = seatXY(clock);
+    p.clock = slot === 0 ? 6 : CLOCK_ORDER[slot - 1];
     const el = document.createElement('div');
     el.className = 'bj-seat' + (p.isHuman ? ' you' : '');
-    el.style.left = x + '%';
-    el.style.top = y + '%';
     el.innerHTML =
       `<div class="hands"></div>
        <div class="seat-plate">
@@ -105,6 +125,17 @@ function buildSeats() {
     wrap.appendChild(el);
     p.el = el;
   });
+  layoutSeats();
+  // masa boyutu değişince (döndürme, klavye, adres çubuğu) yeniden yerleştir
+  requestAnimationFrame(layoutSeats);
+}
+
+addEventListener('resize', layoutSeats);
+addEventListener('orientationchange', () => setTimeout(layoutSeats, 250));
+/* Masanın boyu, alttaki buton satırı gösterilip gizlendikçe de değişiyor;
+   pencere olayı bunu yakalamadığı için masayı doğrudan izliyoruz. */
+if (typeof ResizeObserver !== 'undefined') {
+  new ResizeObserver(() => layoutSeats()).observe(document.getElementById('bj-felt'));
 }
 
 /* ---------------- bahis aşaması ---------------- */
