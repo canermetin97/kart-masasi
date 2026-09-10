@@ -3,6 +3,11 @@
    ============================================================ */
 (() => {
 const $ = id => document.getElementById(id);
+
+/* Sürüm damgası: script'in kendi ?v= etiketinden okunur, elle güncellenmez.
+   Telefonda hangi sürümün çalıştığını görebilmek için ekranda gösterilir. */
+const APP_VERSION = (document.currentScript && document.currentScript.src.match(/v=(\d+)/) || [, '?'])[1];
+document.querySelectorAll('[data-version]').forEach(el => el.textContent = 'sürüm ' + APP_VERSION);
 let chosenGame = 'poker';
 const cfg = { name: 'Sen', count: 4, stack: 1000, bb: 10, blindUp: 0 };
 

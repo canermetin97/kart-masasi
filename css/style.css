@@ -292,6 +292,7 @@ body{
 
 /* oyuncu noktaları: masanın alt yarısında, sabit konumlarda */
 .bj-seats{position:absolute; inset:0}
+.bj-seats[data-n="6"] .bj-seat{width:108px}
 .bj-seat{
   position:absolute; transform:translate(-50%,-50%); width:124px;
   display:flex; flex-direction:column; align-items:center; gap:5px;
@@ -384,8 +385,7 @@ body{
   .card{width:42px; height:60px}
   .card .r,.card .s{font-size:12px}
   .card .big{font-size:20px}
-  .bj-seat{min-width:96px}
-  .bj-seat .seat-plate{min-width:96px}
+  /* halka düzeninde koltuk genişliği width ile veriliyor; min-width onu ezmesin */
   .act-buttons .btn{min-width:84px; padding:10px 12px; font-size:14px}
   .table-area{padding:8px}
 }
@@ -440,7 +440,19 @@ body{
     transform:none !important; min-width:0;
     width:calc(100% / var(--cols, 3) - 6px);
   }
-  .bj-seat{width:96px}
+  .bj-seat{width:84px}
+  /* 6 kişilik masada halka sıkışır: koltuklar hem dar hem alçak olmalı */
+  .bj-seats[data-n="6"] .bj-seat{width:74px; gap:1px}
+  .bj-seats[data-n="6"] .bj-seat .card.sm{width:25px; height:35px}
+  .bj-seats[data-n="6"] .bj-seat .cards-row,
+  .bj-seats[data-n="6"] .bj-seat .hand-cards{height:38px}
+  .bj-seats[data-n="6"] .bj-spot{width:25px; height:35px}
+  .bj-seats[data-n="6"] .bj-hand .total{min-height:10px; font-size:9px}
+  .bj-seats[data-n="6"] .bj-hand .res{min-height:0; font-size:8px}
+  .bj-seats[data-n="6"] .seat-plate{padding:2px 4px}
+  .bj-seats[data-n="6"] .seat-name{font-size:10px}
+  .bj-seats[data-n="6"] .seat-chips{font-size:9px}
+  .bj-seats[data-n="6"] .seat-bet{font-size:9.5px; padding:1px 6px}
   .seat .seat-plate, .bj-seat .seat-plate{min-width:0; width:100%; padding:3px 5px}
   .seat-name{font-size:11px}
   .seat-chips{font-size:10px; margin-top:1px}

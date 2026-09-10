@@ -66,18 +66,26 @@ function stop() { token++; S = null; }
 
    Koltuklar mutlak konumlu; bir oyuncunun eli büyüse de, sıra birine
    geçse de kimsenin kartı yerinden oynamaz. */
+/* Komşu koltuklar arasında en az 45° olsun diye saat aralıkları 1,5 saat.
+   6 kişilik masada üst köşeler (1:30 / 10:30) devreye girer. */
 const CLOCK_ORDER = [3, 9, 4.5, 7.5, 1.5, 10.5];
-const SEAT_RX = 33, SEAT_RY = 33;
+const SEAT_RX = 35, SEAT_RY = 36;
 
 function seatXY(clock) {
   const a = (clock / 12) * 2 * Math.PI - Math.PI / 2;   // 12 yukarı, 3 sağ
-  return { x: 50 + SEAT_RX * Math.cos(a), y: 50 + SEAT_RY * Math.sin(a) };
+  // Üst köşedeki koltuklar (1:30 / 10:30) krupiyenin kart sırasına girmesin diye
+  // daha dışa ve daha aşağıya alınır.
+  const ust = Math.sin(a) < -0.3;
+  const rx = ust ? 40 : SEAT_RX;
+  const ry = ust ? 30 : SEAT_RY;
+  return { x: 50 + rx * Math.cos(a), y: 50 + ry * Math.sin(a) };
 }
 
 function buildSeats() {
   const wrap = $('bj-seats');
   wrap.innerHTML = '';
   const n = S.players.length;
+  wrap.dataset.n = n;                     // kalabalık masada koltuklar daralır
   const meIdx = Math.max(0, S.players.indexOf(S.me));
   S.players.forEach((p, i) => {
     const slot = (i - meIdx + n) % n;                   // kendim her zaman 0 → saat 6

@@ -15,7 +15,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 
-<link rel="stylesheet" href="css/style.css?v=21">
+<link rel="stylesheet" href="css/style.css?v=26">
 </head>
 <body>
 
@@ -49,7 +49,7 @@
         <span class="gc-go">Oyna</span>
       </button>
     </div>
-    <p class="footnote">Gerçek para yok — sadece jeton. Tüm oyuncular tek cihazda; diğer koltuklarda bot oyuncular oturur.</p>
+    <p class="footnote"><span data-version>sürüm —</span> · Gerçek para yok — sadece jeton. Tüm oyuncular tek cihazda; diğer koltuklarda bot oyuncular oturur.</p>
   </div>
 </section>
 
@@ -194,7 +194,7 @@
     <button class="btn primary big hidden" id="pk-next">Sonraki El</button>
   </footer>
 
-  <aside class="logpanel" id="pk-logpanel"><div class="log-head">Oyun Kaydı</div><ul id="pk-log"></ul></aside>
+  <aside class="logpanel" id="pk-logpanel"><div class="log-head">Oyun Kaydı <span data-version></span></div><ul id="pk-log"></ul></aside>
 </section>
 
 <!-- ==================== BLACKJACK ==================== -->
@@ -288,20 +288,20 @@
     </div>
   </div>
 
-  <aside class="logpanel" id="bj-logpanel"><div class="log-head">Oyun Kaydı</div><ul id="bj-log"></ul></aside>
+  <aside class="logpanel" id="bj-logpanel"><div class="log-head">Oyun Kaydı <span data-version></span></div><ul id="bj-log"></ul></aside>
 </section>
 
 <!-- Kurallar ES modülü olarak yüklenir; sunucu da aynı dosyayı kullanır -->
 <script type="module">
-  import * as R from './js/rules.js?v=21';
+  import * as R from './js/rules.js?v=26';
   window.Rules = R;
 </script>
-<script src="js/sfx.js?v=21"></script>
-<script src="js/speed.js?v=21"></script>
-<script src="js/cards.js?v=21"></script>
-<script src="js/poker.js?v=21"></script>
-<script src="js/blackjack.js?v=21"></script>
-<script src="js/online.js?v=21"></script>
-<script src="js/app.js?v=21"></script>
+<script src="js/sfx.js?v=26"></script>
+<script src="js/speed.js?v=26"></script>
+<script src="js/cards.js?v=26"></script>
+<script src="js/poker.js?v=26"></script>
+<script src="js/blackjack.js?v=26"></script>
+<script src="js/online.js?v=26"></script>
+<script src="js/app.js?v=26"></script>
 </body>
 </html>
